@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Generator</title>
+</head>
+<body>
+    <h1>Exam Question Generator</h1>
+    <form id=""questionForm>
+        <textarea id="content" placeholder="Paste your text here" rows="10" cols="50"></textarea>
+        <button type="button" onclick="generateQuestions()">Generate Questions</button>
+    </form>
+    <h2>Generated Questions:</h2>
+    <div id="questions"></div>
+
+    <script>
+        async function generateQuestions() {
+            const content = document.getElementById("content").value;
+            const response = await fetch('/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content })
+            });
+            const data = await response.json();
+            if (data.questions) {
+                document.getElementById("questions").innerText = data.questions;
+            } else {
+                document.getElementById("questions").innerText = data.error || "An error occurred.";
+            }
+        }
+    </script>
+</body>
+</html>
