@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Question Generator</title>
+    <title>Exam Question Generator</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <h1>Exam Question Generator</h1>
-    <form id=""questionForm>
-        <textarea id="content" placeholder="Paste your text here" rows="10" cols="50"></textarea>
+    <form id="questionForm">
+        <textarea id="content" placeholder="Paste your text here..."></textarea>
         <button type="button" onclick="generateQuestions()">Generate Questions</button>
     </form>
-    <h2>Generated Questions:</h2>
     <div id="questions"></div>
+    <footer>
+        Powered by OpenAI | Exam Question Generator
+    </footer>
 
     <script>
         async function generateQuestions() {
@@ -23,10 +26,11 @@
                 body: JSON.stringify({ content })
             });
             const data = await response.json();
+            const questionsDiv = document.getElementById("questions");
             if (data.questions) {
-                document.getElementById("questions").innerText = data.questions;
+                questionsDiv.innerText = data.questions;
             } else {
-                document.getElementById("questions").innerText = data.error || "An error occurred.";
+                questionsDiv.innerText = data.error || "An error occurred.";
             }
         }
     </script>
