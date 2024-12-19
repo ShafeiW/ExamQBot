@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
 import openai
 
+print("Needed to add billing then generate new key! :/")
 # Load API key from .env
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
