@@ -8,29 +8,156 @@
 </head>
 <body>
     <h1>Exam Question Generator</h1>
-    <form id="questionForm">
-        <textarea id="content" placeholder="Paste your text here..."></textarea>
-        <button type="button" onclick="generateQuestions()">Generate Questions</button>
-    </form>
-    <div id="questions"></div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-button" onclick="showTab('questions-tab')">Questions</button>
+        <button class="tab-button" onclick="showTab('flashcards-tab')">Flashcards</button>
+    </div>
+
+    <!-- Questions Tab -->
+    <div id="questions-tab" class="tab-content">
+        <form id="questionForm">
+            <textarea id="content" placeholder="Paste your text here..."></textarea>
+            <div>
+                <label for="questionType">Select Question Type:</label>
+                <select id="questionType">
+                    <option value="mcq">Multiple Choice Questions</option>
+                    <option value="long_answer">Long Answer Questions</option>
+                </select>
+            </div>
+            <button type="button" onclick="generateQuestions()">Generate</button>
+        </form>
+        <div id="questions"></div>
+    </div>
+
+    <!-- Flashcards Tab -->
+    <div id="flashcards-tab" class="tab-content" style="display: none;">
+        <form id="flashcardForm">
+            <textarea id="flashcardContent" placeholder="Paste your text for flashcards here..."></textarea>
+            <button type="button" onclick="generateFlashcards()">Generate Flashcards</button>
+        </form>
+        <div id="flashcard-container" style="display:none;">
+            <div id="flashcard" class="flashcard">
+                <div class="front"></div>
+                <div class="back"></div>
+            </div>
+            <button id="prevButton" onclick="prevFlashcard()" disabled>Previous</button>
+            <button id="flipButton" onclick="flipFlashcard()">Flip</button>
+            <button id="nextButton" onclick="nextFlashcard()">Next</button>
+        </div>
+    </div>
+
     <footer>
         Powered by OpenAI | Exam Question Generator
     </footer>
 
     <script>
+        // Tab Switching Logic
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            document.getElementById(tabId).style.display = 'block';
+        }
+
+        function sanitizeInput(text) {
+            // Replace Markdown-style characters with plain equivalents
+            return text
+                .replace(/[*#_~`]/g, '') // Remove *, #, _, ~, and backticks
+                .replace(/[\r\n]+/g, '\n') // Normalize line breaks
+                .trim();
+}
+
+        // Generate Questions Logic (MCQ/Long Answer)
         async function generateQuestions() {
-            const content = document.getElementById("content").value;
+            const content = sanitizeInput(document.getElementById("content").value);
+            const questionType = document.getElementById("questionType").value;
             const response = await fetch('/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content })
+                body: JSON.stringify({ content, questionType })
             });
             const data = await response.json();
             const questionsDiv = document.getElementById("questions");
+            questionsDiv.innerHTML = ""; // Clear previous questions
+
             if (data.questions) {
-                questionsDiv.innerText = data.questions;
+                const questions = data.questions.split("\n").filter(line => line.trim());
+                questionsDiv.innerHTML = `
+                    <ul class="question-list">
+                        ${questions.map(question => `<li>${question}</li>`).join('')}
+                    </ul>
+                `;    
             } else {
-                questionsDiv.innerText = data.error || "An error occurred.";
+                questionsDiv.innerHTML = `<p class="error">${data.error || "An error occurred."}</p>`;
+            }
+        }
+
+        // Generate Flashcards Logic
+        let flashcards = [];
+        let currentCardIndex = 0;
+
+        async function generateFlashcards() {
+            const content = document.getElementById("flashcardContent").value;
+            const response = await fetch('/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content, questionType: "flashcards" })
+            });
+            const data = await response.json();
+            const flashcardContainer = document.getElementById("flashcard-container");
+
+            if (data.questions) {
+                flashcards = data.questions
+                    .split("\n")
+                    .filter(line => line.trim())
+                    .map(card => {
+                        const [term, definition] = card.split(":").map(s => s.trim());
+                        return { term, definition };
+                    });
+
+                if (flashcards.length > 0) {
+                    currentCardIndex = 0;
+                    updateFlashcard();
+                    flashcardContainer.style.display = "block";
+                } else {
+                    alert("No flashcards generated.");
+                }
+            } else {
+                alert(data.error || "An error occurred.");
+            }
+        }
+
+        function updateFlashcard() {
+            const flashcardDiv = document.getElementById("flashcard");
+            const front = flashcardDiv.querySelector(".front");
+            const back = flashcardDiv.querySelector(".back");
+
+            front.innerText = flashcards[currentCardIndex].term;
+            back.innerText = flashcards[currentCardIndex].definition;
+
+            document.getElementById("prevButton").disabled = currentCardIndex === 0;
+            document.getElementById("nextButton").disabled = currentCardIndex === flashcards.length - 1;
+
+            flashcardDiv.classList.remove("flipped");
+        }
+
+        function flipFlashcard() {
+            document.getElementById("flashcard").classList.toggle("flipped");
+        }
+
+        function prevFlashcard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                updateFlashcard();
+            }
+        }
+
+        function nextFlashcard() {
+            if (currentCardIndex < flashcards.length - 1) {
+                currentCardIndex++;
+                updateFlashcard();
             }
         }
     </script>
