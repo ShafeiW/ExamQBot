@@ -67,7 +67,8 @@ OPENAI_API_KEY=your-openai-api-key
 python app.py 
 ```
 
-### **5. Navigate to local host: http://127.0.0.1:5000**
+### **6. Navigate to local host: http://127.0.0.1:5000**
+
 
 
 ## **Usage**
