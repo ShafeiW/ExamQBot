@@ -4,95 +4,168 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Question Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Optional: Custom Styles -->
     <link rel="stylesheet" href="/static/styles.css">
 </head>
-<body>
-    <h1>Exam Question Generator</h1>
+<body class="bg-light">
+    <div class="container py-5">
+        <!-- Header -->
+        <h1 class="text-center text-success mb-5">Exam Question Generator</h1>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab-button" onclick="showTab('questions-tab')">Questions</button>
-        <button class="tab-button" onclick="showTab('flashcards-tab')">Flashcards</button>
-    </div>
+        <!-- Tabs for Navigation -->
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="questions-tab" data-bs-toggle="tab" data-bs-target="#questions" type="button" role="tab" aria-controls="questions" aria-selected="true">Questions</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="flashcards-tab" data-bs-toggle="tab" data-bs-target="#flashcards" type="button" role="tab" aria-controls="flashcards" aria-selected="false">Flashcards</button>
+            </li>
+        </ul>
 
-    <!-- Questions Tab -->
-    <div id="questions-tab" class="tab-content">
-        <form id="questionForm">
-            <textarea id="content" placeholder="Paste your text here..."></textarea>
-            <div>
-                <label for="questionType">Select Question Type:</label>
-                <select id="questionType">
-                    <option value="mcq">Multiple Choice Questions</option>
-                    <option value="long_answer">Long Answer Questions</option>
-                </select>
+        <!-- Tab Content -->
+        <div class="tab-content" id="myTabContent">
+            <!-- Questions Tab -->
+            <div class="tab-pane fade show active" id="questions" role="tabpanel" aria-labelledby="questions-tab">
+                <form id="questionForm" class="mb-4">
+                    <div class="mb-3">
+                        <textarea id="content" class="form-control" placeholder="Paste your text here..." rows="5"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="questionType" class="form-label">Select Question Type:</label>
+                        <select id="questionType" class="form-select">
+                            <option value="mcq">Multiple Choice Questions</option>
+                            <option value="long_answer">Long Answer Questions</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="generateQuestions()">Generate</button>
+                </form>
+                <div id="questions" class="border rounded p-3 bg-white shadow-sm"></div>
+                <button class="btn btn-outline-primary mt-3" onclick="returnToHome()">Return to Home</button>
             </div>
-            <button type="button" onclick="generateQuestions()">Generate</button>
-        </form>
-        <div id="questions"></div>
-    </div>
 
-    <!-- Flashcards Tab -->
-    <div id="flashcards-tab" class="tab-content" style="display: none;">
-        <form id="flashcardForm">
-            <textarea id="flashcardContent" placeholder="Paste your text for flashcards here..."></textarea>
-            <button type="button" onclick="generateFlashcards()">Generate Flashcards</button>
-        </form>
-        <div id="flashcard-container" style="display:none;">
-            <div id="flashcard" class="flashcard">
-                <div class="front"></div>
-                <div class="back"></div>
+            <!-- Flashcards Tab -->
+            <div class="tab-pane fade" id="flashcards" role="tabpanel" aria-labelledby="flashcards-tab">
+                <form id="flashcardForm" class="mb-4">
+                    <div class="mb-3">
+                        <textarea id="flashcardContent" class="form-control" placeholder="Paste your text for flashcards here..." rows="5"></textarea>
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="generateFlashcards()">Generate Flashcards</button>
+                </form>
+                <div id="flashcard-container" class="d-none">
+                    <div id="flashcard" class="flashcard border rounded shadow-sm text-center p-3">
+                        <div class="front"></div>
+                        <div class="back"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <button id="prevButton" class="btn btn-outline-success" onclick="prevFlashcard()" disabled>Previous</button>
+                        <button id="flipButton" class="btn btn-success" onclick="flipFlashcard()">Flip</button>
+                        <button id="nextButton" class="btn btn-outline-success" onclick="nextFlashcard()">Next</button>
+                    </div>
+                </div>
             </div>
-            <button id="prevButton" onclick="prevFlashcard()" disabled>Previous</button>
-            <button id="flipButton" onclick="flipFlashcard()">Flip</button>
-            <button id="nextButton" onclick="nextFlashcard()">Next</button>
         </div>
     </div>
 
-    <footer>
+    <!-- Footer -->
+    <footer class="text-center mt-5 text-muted">
         Powered by OpenAI | Exam Question Generator
     </footer>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
     <script>
         // Tab Switching Logic
         function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.style.display = 'none';
-            });
-            document.getElementById(tabId).style.display = 'block';
+            const tabs = document.querySelectorAll('.tab-pane');
+            tabs.forEach(tab => tab.classList.remove('show', 'active'));
+            document.getElementById(tabId).classList.add('show', 'active');
         }
 
         function sanitizeInput(text) {
-            // Replace Markdown-style characters with plain equivalents
-            return text
-                .replace(/[*#_~`]/g, '') // Remove *, #, _, ~, and backticks
-                .replace(/[\r\n]+/g, '\n') // Normalize line breaks
-                .trim();
-}
+            return text.replace(/[*#_~`]/g, '').replace(/[\r\n]+/g, '\n').trim();
+        }
 
-        // Generate Questions Logic (MCQ/Long Answer)
         async function generateQuestions() {
             const content = sanitizeInput(document.getElementById("content").value);
             const questionType = document.getElementById("questionType").value;
-            const response = await fetch('/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content, questionType })
-            });
-            const data = await response.json();
-            const questionsDiv = document.getElementById("questions");
-            questionsDiv.innerHTML = ""; // Clear previous questions
 
-            if (data.questions) {
-                const questions = data.questions.split("\n").filter(line => line.trim());
-                questionsDiv.innerHTML = `
-                    <ul class="question-list">
-                        ${questions.map(question => `<li>${question}</li>`).join('')}
-                    </ul>
-                `;    
-            } else {
-                questionsDiv.innerHTML = `<p class="error">${data.error || "An error occurred."}</p>`;
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content, questionType })
+                });
+
+                const data = await response.json();
+                const questionsDiv = document.getElementById("questions");
+                questionsDiv.innerHTML = ""; // Clear previous questions
+
+                if (response.ok && data.questions) {
+                    // Split questions by double line breaks
+                    const questions = data.questions.split("\n\n").filter(q => q.trim());
+
+                    questionsDiv.innerHTML = questions
+                        .map((question, index) => {
+                            // Split question into main text and options
+                            const [questionText, ...options] = question.split("\n");
+                            
+                            // Check if question already has numbering (e.g., "1.")
+                            const isNumbered = questionText.trim().match(/^\d+\.\s/);
+                            const formattedQuestion = isNumbered
+                                ? questionText.trim() // Use existing numbering
+                                : `${index + 1}. ${questionText.trim()}`; // Add numbering if missing
+                            
+                            // Format options (split by "A)", "B)", etc.)
+                            const formattedOptions = options
+                                .join(" ") // Combine options into a single string
+                                .split(/(?=\b[A-D]\))/) // Split by A), B), C), D)
+                                .map(option => `<li>${option.trim()}</li>`)
+                                .join("");
+
+                            return `
+                                <div class="border rounded mb-3 p-3 shadow-sm">
+                                    <p class="fw-bold">${formattedQuestion}</p>
+                                    <ul class="list-unstyled ms-3">${formattedOptions}</ul>
+                                </div>
+                            `;
+                        })
+                        .join('');
+
+                    // Add the Return to Home button after questions
+                    questionsDiv.innerHTML += `
+                        <div class="text-center mt-4">
+                            <button class="btn btn-outline-primary" onclick="returnToHome()">Return to Home</button>
+                        </div>
+                    `;
+                } else {
+                    questionsDiv.innerHTML = `<p class="text-danger">${data.error || "An error occurred."}</p>`;
+                }
+            } catch (error) {
+                console.error("Error generating questions:", error);
+                const questionsDiv = document.getElementById("questions");
+                questionsDiv.innerHTML = `<p class="text-danger">An unexpected error occurred. Please try again later.</p>`;
             }
         }
+
+
+
+
+        function returnToHome() {
+            // Option 1: Reload the page to reset everything
+            window.location.reload();
+
+            // Option 2: Clear the input and generated questions while keeping the page loaded
+            /*
+            document.getElementById("content").value = "";
+            document.getElementById("questions").innerHTML = "";
+            document.getElementById("questionForm").reset();
+            showTab("questions-tab");
+            */
+        }
+
 
         // Generate Flashcards Logic
         let flashcards = [];
@@ -109,18 +182,15 @@
             const flashcardContainer = document.getElementById("flashcard-container");
 
             if (data.questions) {
-                flashcards = data.questions
-                    .split("\n")
-                    .filter(line => line.trim())
-                    .map(card => {
-                        const [term, definition] = card.split(":").map(s => s.trim());
-                        return { term, definition };
-                    });
+                flashcards = data.questions.split("\n").filter(line => line.trim()).map(card => {
+                    const [term, definition] = card.split(":").map(s => s.trim());
+                    return { term, definition };
+                });
 
                 if (flashcards.length > 0) {
                     currentCardIndex = 0;
                     updateFlashcard();
-                    flashcardContainer.style.display = "block";
+                    flashcardContainer.classList.remove("d-none");
                 } else {
                     alert("No flashcards generated.");
                 }
