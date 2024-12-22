@@ -1,7 +1,5 @@
 # ExamQChatBot
 
-# Exam Question Generator
-
 ### **Overview**
 The **Exam Question Generator** is a web application that leverages OpenAI's GPT models to generate educational content such as:
 - Multiple Choice Questions (MCQs)
