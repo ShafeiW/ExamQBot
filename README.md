@@ -45,29 +45,29 @@ This tool is designed to help educators, students, and professionals quickly cre
 ```bash
 git clone https://github.com/your-username/exam-question-generator.git
 cd exam-question-generator
-exit 
+```
 
 ### **2. Create a Virtual Environment**
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-exit 
+```
 
 
 ### **3. Install Dependencies**
 Manually install the required Python packages:
 ```bash
 pip install flask python-dotenv openai
-exit 
+```
 
 ### **4. Set Up Environment Variables**
 Create a .env file in the project root directory and add your OpenAI API key:
 ```bash
 OPENAI_API_KEY=your-openai-api-key
-exit 
+```
 
 ### **5. Run the Application**
 ```bash
 flask run
-exit 
+```
 
