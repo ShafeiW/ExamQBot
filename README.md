@@ -64,20 +64,24 @@ OPENAI_API_KEY=your-openai-api-key
 
 ### **5. Run the Application**
 ```bash
-flask run / python app.py 
+python app.py 
 ```
+
+### **5. Navigate to local host: http://127.0.0.1:5000**
+
 
 ## **Usage**
 
 ### **1. Choose between question or flashcard generation.**
 
-### **2. Enter content in the input boxes - preferably class notes without too many special characters.**
+### **2. Enter content in the input boxes**
+- preferably class notes without too many special characters.
 
-### **3. If generating questions, select the question type: **
+### **3. If generating questions, select the question type:**
 - Multiple Choice Questions (MCQs)
 - Long Answer Questions
 
-### **4. Click "generate" and view desired material. **
+### **4. Click "generate" and view desired material.**
 
 
 ## **Project Structure**
