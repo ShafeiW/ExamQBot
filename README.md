@@ -103,6 +103,17 @@ question-generator/
 - Integrate user authentication to save and manage content.
 - Add more customization options for generated questions (e.g., difficulty level, question count).
 
+## **Screenshots**
+### Main Interface
+![Main Interface](screenshots/exam1.png)
+
+### Question Results
+![Question Results](screenshots/exam2.png)
+![Question Results](screenshots/exam3.png)
+
+### Flashcard Results
+![Flashcard Results](screenshots/exam4.png)
+![Flashcard Results](screenshots/exam5.png)
 
 
 
